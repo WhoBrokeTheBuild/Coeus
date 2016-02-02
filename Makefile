@@ -1,5 +1,6 @@
 .PHONY: all clean rebuild \
-	Common CSL FTP HTTP Mail SQL
+	Common CSL FTP HTTP Mail SQL \
+	RunFTP RunHTTP RunSQL RunMail
 
 CC = g++
 AR = ar
@@ -59,6 +60,9 @@ FTP_SRV_OBJ = $(addprefix $(OBJ_DIR)/, $(FTP_SRV_SRC:.cpp=.o))
 FTP: $(FTP_SRV_OBJ)
 	$(LD) -o $(FTP_SRV_OUT) $(FTP_SRV_OBJ) $(LD_FLAGS)
 
+run-FTP:
+	cd FTP; ../Build/FTPServer
+
 # HTTP Server
 
 HTTP_SRV_SRC = $(shell find HTTP/ -type f -name '*.cpp')
@@ -66,6 +70,9 @@ HTTP_SRV_OBJ = $(addprefix $(OBJ_DIR)/, $(HTTP_SRV_SRC:.cpp=.o))
 
 HTTP: $(HTTP_SRV_OBJ)
 	$(LD) -o $(HTTP_SRV_OUT) $(HTTP_SRV_OBJ) $(LD_FLAGS)
+
+run-HTTP:
+	cd HTTP; ../Build/HTTPServer -f conf/main.cfg
 
 # SQL Server
 
@@ -75,6 +82,9 @@ SQL_SRV_OBJ = $(addprefix $(OBJ_DIR)/, $(SQL_SRV_SRC:.cpp=.o))
 SQL: $(SQL_SRV_OBJ)
 	$(LD) -o $(SQL_SRV_OUT) $(SQL_SRV_OBJ) $(LD_FLAGS)
 
+run-SQL:
+	cd SQL; ../Build/SQLServer
+
 # Mail Server
 
 MAIL_SRV_SRC = $(shell find Mail/ -type f -name '*.cpp')
@@ -82,3 +92,6 @@ MAIL_SRV_OBJ = $(addprefix $(OBJ_DIR)/, $(MAIL_SRV_SRC:.cpp=.o))
 
 Mail: $(MAIL_SRV_OBJ)
 	$(LD) -o $(MAIL_SRV_OUT) $(MAIL_SRV_OBJ) $(LD_FLAGS)
+
+run-Mail:
+	cd Mail; ../Build/MailServer
