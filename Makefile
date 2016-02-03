@@ -61,7 +61,7 @@ FTP: $(FTP_SRV_OBJ)
 	$(LD) -o $(FTP_SRV_OUT) $(FTP_SRV_OBJ) $(LD_FLAGS)
 
 run-FTP:
-	cd FTP; ../Build/FTPServer
+	cd FTP; ../Build/FTPServer -f conf/main.cfg
 
 # HTTP Server
 

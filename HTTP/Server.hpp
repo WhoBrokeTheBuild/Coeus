@@ -17,7 +17,6 @@ public:
     ~Server();
 
     void Run();
-    void HandleConnection(tcp::socket sock);
 
     inline const Config* GetConfig() const { return &m_Config; }
 

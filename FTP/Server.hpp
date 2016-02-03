@@ -17,7 +17,9 @@ public:
     ~Server();
 
     void Run();
-    void HandleConnection(tcp::socket sock);
+
+    inline const Config* GetConfig() const { return &m_Config; }
+    inline asio::io_service& GetIoService() { return m_IoSvc; }
 
 private:
 

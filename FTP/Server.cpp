@@ -1,5 +1,8 @@
 #include "Server.hpp"
 
+#include "Worker.hpp"
+#include <thread>
+
 Server::Server(const string& configFile) :
     m_Config(),
     m_IoSvc()
@@ -7,25 +10,32 @@ Server::Server(const string& configFile) :
     m_Config.Load(configFile);
 }
 
-void Server::Run()
+Server::~Server()
 {
-    if (m_Config.GetCommandPort() == 0)
-    {
-        fprintf(stderr, "Error: No command port specified\n");
-        return;
-    }
 
-    if (m_Config.GetDataPort() == 0)
-    {
-        fprintf(stderr, "Error: No data port specified\n");
-        return;
-    }
-
-    tcp::acceptor a(m_IoSvc, tcp::endpoint(tcp::v4(), m_Config.GetCommandPort()));
-    printf("FTP Server running on command port %d\n", m_Config.GetCommandPort());
 }
 
-void Server::HandleConnection(tcp::socket sock)
+void Server::Run()
 {
+    if (m_Config.GetPort() == 0)
+    {
+        fprintf(stderr, "Error: No port specified\n");
+        return;
+    }
 
+    tcp::acceptor a(m_IoSvc, tcp::endpoint(tcp::v4(), m_Config.GetPort()));
+    printf("FTP Server running on command port %d\n", m_Config.GetPort());
+
+    for (;;)
+    {
+        tcp::socket sock(m_IoSvc);
+        a.accept(sock);
+        std::thread(
+            [this](tcp::socket sock)
+            {
+                Worker w(this, std::move(sock));
+                w.Run();
+            },
+        std::move(sock)).detach();
+    }
 }

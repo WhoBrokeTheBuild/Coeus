@@ -17,13 +17,14 @@ public:
 
     bool Load(const string& filename);
 
-    inline unsigned int GetCommandPort() const { return m_CommandPort; }
-    inline unsigned int GetDataPort() const { return m_DataPort; }
+    inline unsigned int GetPort() const { return m_Port; }
+    inline string GetRootDir() const { return m_RootDir; }
 
 private:
 
-    unsigned int m_CommandPort;
-    unsigned int m_DataPort;
+    unsigned int m_Port;
+
+    string m_RootDir;
 
 };
 

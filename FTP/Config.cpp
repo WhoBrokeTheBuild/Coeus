@@ -9,7 +9,9 @@
 
 using std::ifstream;
 
-Config::Config()
+Config::Config() :
+	m_Port(),
+	m_RootDir()
 {
 
 }
@@ -47,17 +49,15 @@ bool Config::Load(const string& filename)
 
         const string& command = pieces[0];
 
-        if (command == "commandport")
+        if (command == "port")
         {
             std::stringstream ss;
             ss << pieces[1];
-            ss >> m_CommandPort;
+            ss >> m_Port;
         }
-        else if (command == "dataport")
+        else if (command == "rootdir")
         {
-            std::stringstream ss;
-            ss << pieces[1];
-            ss >> m_DataPort;
+			m_RootDir = pieces[1];
         }
 
     }
