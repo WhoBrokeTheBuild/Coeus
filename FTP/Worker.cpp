@@ -1,6 +1,7 @@
 #include "Worker.hpp"
 
 #include "Server.hpp"
+#include "Functions.hpp"
 #include <vector>
 #include <dirent.h>
 
@@ -120,39 +121,78 @@ void Worker::Run()
         }
         else if (cmd == "list")
         {
+            asio::streambuf resp;
+            std::ostream respStream(&resp);
+
         	DIR *dir;
         	struct dirent *ent;
 
-            string path = mp_Server->GetConfig()->GetRootDir() + m_Pwd;
+            string path = mp_Server->GetConfig()->GetRootDir() + "/" + m_Pwd;
         	dir = opendir(path.c_str());
         	if (dir != NULL)
         	{
         		while ((ent = readdir(dir)) != NULL)
         		{
-                    string line = "";
+                    string line;
         			string name = string(ent->d_name);
+                    string filename = path + "/" + name;
 
-        			switch (ent->d_type)
-        			{
-        			case DT_REG:
-
-
-        				break;
-        			case DT_DIR:
-
-
-        				break;
-        			}
-
+                    respStream << "+i8388621.48594,m825718503,";
 
         			if (name != "." && name != "..")
         			{
+
+            			switch (ent->d_type)
+            			{
+            			case DT_REG:
+                            {
+                                respStream << "r,";
+
+                                std::ifstream file(filename);
+                                size_t size = GetFileSize(file);
+                                file.close();
+
+                                respStream << "s" << size << ",";
+                            }
+            				break;
+            			case DT_DIR:
+
+                            respStream << "/,";
+
+            				break;
+            			}
+
+                        respStream << "\t" << name << "\r\n";
         			}
 
         		}
 
         		closedir(dir);
         	}
+
+            SendMessage("150 Opening Data Connection to Send File List");
+            m_DataSock.connect(m_DataEndpoint);
+            asio::write(m_DataSock, resp);
+            m_DataSock.close();
+            ret = SendMessage("226 Transfer complete");
+        }
+        else if (cmd == "cwd")
+        {
+            ss >> m_Pwd;
+
+            ret = SendMessage("250 Changed directory to \"" + m_Pwd + "\"");
+        }
+        else if (cmd == "mkd")
+        {
+            string dir;
+            ss >> dir;
+
+            dir = mp_Server->GetConfig()->GetRootDir() + "/" + dir;
+
+            if (MakeDir(dir))
+            {
+                ret = SendMessage("257 \"" + dir + "\" Created");
+            }
 
         }
         else

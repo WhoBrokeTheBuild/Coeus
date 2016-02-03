@@ -3,6 +3,9 @@
 #include <cstdio>
 #include <sstream>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 void Pause()
 {
     printf("Press enter to continue...\n");
@@ -145,4 +148,14 @@ string Basename(const string& path)
 		return "";
 
 	return parts.back();
+}
+
+bool MakeDir(const string& path)
+{
+    int status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    if (status)
+        return false;
+
+    return true;
 }

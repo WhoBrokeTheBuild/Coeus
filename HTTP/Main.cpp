@@ -1,5 +1,6 @@
 #include "Server.hpp"
 
+#include "CSL.hpp"
 #include <getopt.h>
 #include <cstdlib>
 #include <cstdio>
@@ -11,6 +12,8 @@ void usage()
 
 int main(int argc, char** argv)
 {
+    printf("Running CSL Version: %s\n", CSL::GetVersionString());
+
     string config;
 
     struct option longopts[] = {

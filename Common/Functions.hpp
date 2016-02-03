@@ -20,4 +20,6 @@ vector<string> StringSplit(const string& str, const string& delim, int limit = -
 
 string Basename(const string& path);
 
+bool MakeDir(const string& path);
+
 #endif // COEUS_FUNCTIONS_HPP
