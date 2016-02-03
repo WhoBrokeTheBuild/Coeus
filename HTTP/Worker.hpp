@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <fstream>
 #include <asio.hpp>
 
 using std::string;
@@ -28,9 +29,16 @@ public:
 
 private:
 
-    void GetHeader();
     void HandleRequest();
-    void SendDirectoryList(const string& path, const string& realPath);
+
+    void ReadRequestHeader();
+    void WriteBufferResponse(const string& buf);
+    void WriteFileResponse(std::ifstream& file);
+
+    void MethodGetHandler(const bool& sendBody = true);
+    void MethodPostHandler();
+
+    string GetDirectoryListHTML(const string& path, const string& realPath);
 
     Server* mp_Server;
 
@@ -41,6 +49,12 @@ private:
     string m_Protocol;
 
     map<string, string> m_Headers;
+
+    map<string, std::function<void()>> m_Handlers;
+
+    string m_RespLine;
+    map<string, string> m_RespHeaders;
+    string m_RespBody;
 
 };
 

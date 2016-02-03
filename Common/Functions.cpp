@@ -2,9 +2,12 @@
 
 #include <cstdio>
 #include <sstream>
+#include <ctime>
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
 
 void Pause()
 {
@@ -158,4 +161,50 @@ bool MakeDir(const string& path)
         return false;
 
     return true;
+}
+
+time_t GetFileLastModified(const string& filename)
+{
+    struct tm* clock;
+    struct stat attrib;
+    stat(filename.c_str(), &attrib);
+    clock = gmtime(&(attrib.st_mtime));
+
+    return mktime(clock);
+}
+
+vector<DirectoryEntry> GetDirectoryList(const string& path)
+{
+    vector<DirectoryEntry> entries;
+
+	DIR *dir;
+	struct dirent *ent;
+
+	dir = opendir(path.c_str());
+	if (dir != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+		{
+            DirectoryEntry::EntryType type;
+			switch (ent->d_type)
+			{
+			case DT_REG:
+
+				type = DirectoryEntry::EntryType::File;
+
+				break;
+			case DT_DIR:
+
+				type = DirectoryEntry::EntryType::Directory;
+
+				break;
+			}
+
+            entries.push_back(DirectoryEntry(ent->d_name, type));
+		}
+
+		closedir(dir);
+	}
+
+    return entries;
 }

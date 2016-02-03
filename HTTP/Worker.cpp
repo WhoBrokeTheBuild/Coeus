@@ -2,13 +2,16 @@
 
 #include "Server.hpp"
 #include "Functions.hpp"
-#include <dirent.h>
 
 Worker::Worker(Server* pServer, tcp::socket sock) :
     mp_Server(pServer),
     m_Sock(std::move(sock))
 {
-
+    m_Handlers.emplace("get", [this](){ MethodGetHandler(); });
+    m_Handlers.emplace("head", [this](){ MethodGetHandler(false); });
+    m_Handlers.emplace("post", [this](){ MethodPostHandler(); });
+    m_Handlers.emplace("put", [this](){ MethodGetHandler(); });
+    m_Handlers.emplace("delete", [this](){ MethodGetHandler(); });
 }
 
 Worker::~Worker()
@@ -18,11 +21,11 @@ Worker::~Worker()
 
 void Worker::Run()
 {
-    GetHeader();
+    ReadRequestHeader();
     HandleRequest();
 }
 
-void Worker::GetHeader()
+void Worker::ReadRequestHeader()
 {
     asio::streambuf headerBuf;
     asio::read_until(m_Sock, headerBuf, "\r\n\r\n");
@@ -61,190 +64,198 @@ void Worker::GetHeader()
 
 void Worker::HandleRequest()
 {
-    if (m_Method == "get")
+    const auto& handlerIt = m_Handlers.find(m_Method);
+    if (handlerIt != m_Handlers.cend())
     {
-    	std::ifstream file;
-    	bool directoryListing = false;
-
-    	string realPath = mp_Server->GetConfig()->GetContentRoot() + m_Path;
-
-    	if (m_Path.back() == '/')
-    	{
-    		bool defaultFound = false;
-    		const vector<string>& indexes = mp_Server->GetConfig()->GetIndexes();
-    		for (const auto& indexFile : indexes)
-    		{
-    			file.open(realPath + indexFile, std::ios::in | std::ios::binary);
-
-    			if (file)
-    			{
-    				realPath += indexFile;
-    				defaultFound = true;
-    				break;
-    			}
-    		}
-
-    		if (!defaultFound)
-    		{
-    			directoryListing = true;
-    		}
-    	}
-    	else
-    		file.open(realPath, std::ios::in | std::ios::binary);
-
-    	if (!directoryListing && !file)
-    	{
-    		const string& response = "HTTP/1.0 404 Not Found";
-
-            asio::streambuf resp;
-            std::ostream respStream(&resp);
-            respStream << "HTTP/1.0 404 Not Found\r\n";
-            asio::write(m_Sock, resp);
-
-    		file.close();
-    		file.open(mp_Server->GetConfig()->Get404File());
-    	}
-    	else
-    	{
-    		const string& response = "HTTP/1.0 200 OK";
-
-            asio::streambuf resp;
-            std::ostream respStream(&resp);
-            respStream << "HTTP/1.0 200 OK\r\n";
-            asio::write(m_Sock, resp);
-    	}
-
-    	if (directoryListing)
-    	{
-            SendDirectoryList(m_Path, realPath);
-    	}
-    	else
-    	{
-            asio::streambuf resp;
-            std::ostream respStream(&resp);
-            respStream << "HTTP/1.0 200 OK\r\n";
-
-            vector<string> filenameParts = StringSplit(Basename(realPath), ".");
-    		const string& ext = filenameParts.back();
-
-    		const string& mimeType = mp_Server->GetConfig()->GetMimeType(ext);
-            respStream << "Content-Type: " << mimeType << "\r\n";
-
-    		const std::streamsize& fileSize = GetFileSize(file);
-    		respStream << "Content-Size: " << fileSize << "\r\n";
-
-            respStream << "\r\n";
-            asio::write(m_Sock, resp);
-
-        	const int TMP_BUFFER_SIZE = 4096;
-
-        	char tmp_buffer[TMP_BUFFER_SIZE];
-        	std::streamsize n;
-        	do
-        	{
-        		file.read(tmp_buffer, TMP_BUFFER_SIZE);
-        		n = file.gcount();
-
-        		if (n == 0)
-        			break;
-
-                asio::write(m_Sock, asio::buffer(tmp_buffer, n));
-
-        		if (!file)
-        			break;
-        	} while (n > 0);
-    	}
-    }
-    else if (m_Method == "post")
-    {
-
+        handlerIt->second();
     }
 }
 
+void Worker::WriteBufferResponse(const string& buff)
+{
+    asio::streambuf resp;
+    std::ostream respStream(&resp);
+    respStream << m_RespLine << "\r\n";
 
-void Worker::SendDirectoryList(const string& path, const string& realPath)
+    std::stringstream ss;
+    ss << buff.size();
+	m_RespHeaders.emplace("Content-Size", ss.str());
+
+    for (const auto& header : m_RespHeaders)
+    {
+        respStream << header.first << ": " << header.second << "\r\n";
+    }
+
+    respStream << "\r\n";
+    respStream << buff;
+
+    asio::write(m_Sock, resp);
+}
+
+void Worker::WriteFileResponse(std::ifstream& file)
+{
+    asio::streambuf resp;
+    std::ostream respStream(&resp);
+    respStream << m_RespLine << "\r\n";
+
+    std::stringstream ss;
+    ss << GetFileSize(file);
+	m_RespHeaders.emplace("Content-Size", ss.str());
+
+    for (const auto& header : m_RespHeaders)
+    {
+        respStream << header.first << ": " << header.second << "\r\n";
+    }
+
+    respStream << "\r\n";
+
+    asio::write(m_Sock, resp);
+
+    const int TMP_BUFFER_SIZE = 4096;
+
+    char tmp_buffer[TMP_BUFFER_SIZE];
+    std::streamsize n;
+    do
+    {
+        file.read(tmp_buffer, TMP_BUFFER_SIZE);
+        n = file.gcount();
+
+        if (n == 0)
+            break;
+
+        asio::write(m_Sock, asio::buffer(tmp_buffer, n));
+
+        if (!file)
+            break;
+    } while (n > 0);
+}
+
+string Worker::GetDirectoryListHTML(const string& path, const string& realPath)
 {
 	std::stringstream output;
 
-	output << "<html>\r\n"
-		<< "<head>\r\n"
-		<< "<title>Directory Listing for " << path << "</title>\r\n"
-		<< "</head>\r\n"
-		<< "<body>\r\n"
-		<< "<h1>Directory Listing for " << path << "</h1>\r\n"
-		<< "<table>\r\n"
-		<< "<tr><th>Icon</th><th>Name</th><th>Type</th></tr>";
+	output << "<html><head><title>Directory Listing for " << path << "</title></head>"
+		<< "<body><h1>Directory Listing for " << path << "</h1>"
+        << "<table><tr><th>Icon</th><th>Name</th><th>Type</th></tr>";
 
-	DIR *dir;
-	struct dirent *ent;
+    const vector<DirectoryEntry>& entries = GetDirectoryList(realPath);
 
-	dir = opendir(realPath.c_str());
-	if (dir != NULL)
-	{
-		while ((ent = readdir(dir)) != NULL)
+    string href;
+
+    string tmpPath = path;
+    tmpPath.pop_back();
+    size_t lastSlash = tmpPath.rfind('/');
+    if (lastSlash != string::npos)
+    {
+        href = tmpPath.substr(0, lastSlash + 1);
+    }
+
+    output << "<tr><td>D</td><td>"
+        << "<a href=\"" << href << "\">..</a>"
+        << "</td><td>Directory</td></tr>";
+
+    for (const auto& ent : entries)
+    {
+		if (ent.Filename == "." || ent.Filename == "..")
+            continue;
+
+        string type;
+        switch (ent.Type)
+        {
+        case DirectoryEntry::EntryType::File:
+
+            type = "File";
+
+            break;
+        case DirectoryEntry::EntryType::Directory:
+
+            type = "Directory";
+
+            break;
+        }
+
+        output << "<tr><td>" << type.front() << "</td><td>";
+
+		if (href.length() > 0)
 		{
-			string type = "";
-			string name = string(ent->d_name);
-			string href = "";
-
-			switch (ent->d_type)
-			{
-			case DT_REG:
-
-				type = "File";
-
-				break;
-			case DT_DIR:
-
-				type = "Directory";
-
-				break;
-			}
-
-			if (name != "." && name != "..")
-			{
-				href = path + name;
-			}
-
-			if (name == ".." && path.length() > 1)
-			{
-				string tmpPath = path;
-				tmpPath.pop_back();
-				size_t lastSlash = tmpPath.rfind('/');
-				if (lastSlash != string::npos)
-				{
-					href = tmpPath.substr(0, lastSlash + 1);
-				}
-			}
-
-			output << "<tr><td>" << type.front() << "</td><td>";
-
-			if (href.length() > 0)
-			{
-				output << "<a href=\"" << href << "\">" << name << "</a>";
-			}
-			else
-				output << name;
-
-			output << "</td><td>" << type << "</td></tr>\r\n";
+			output << "<a href=\"" << href << "\">" << ent.Filename << "</a>";
 		}
+		else
+        {
+			output << ent.Filename;
+        }
 
-		closedir(dir);
+		output << "</td><td>" << type << "</td></tr>";
+    }
 
-	}
+	output << "</table></body></html>";
+	return output.str();
+}
 
-	output << "</table>\r\n"
-		<< "</body>\r\n"
-		<< "</html>\r\n";
+void Worker::MethodGetHandler(const bool& sendBody /*= true*/)
+{
+    std::ifstream file;
+    bool directoryListing = false;
 
-	string outStr = output.str();
+    string realPath = mp_Server->GetConfig()->GetContentRoot() + m_Path;
 
-    asio::streambuf resp;
-    std::ostream respStream(&resp);
-    respStream << "HTTP/1.0 200 OK\r\n";
-	respStream << "Content-Size: " << outStr.length() << "\r\n";
-	respStream << "\r\n";
-    respStream << outStr;
-    
-    asio::write(m_Sock, resp);
+    if (m_Path.back() == '/')
+    {
+        bool indexFound = false;
+        const vector<string>& indexes = mp_Server->GetConfig()->GetIndexes();
+        for (const auto& indexFile : indexes)
+        {
+            file.open(realPath + indexFile, std::ios::in | std::ios::binary);
+
+            if (file)
+            {
+                realPath += indexFile;
+                indexFound = true;
+                break;
+            }
+        }
+
+        if (!indexFound)
+        {
+            directoryListing = true;
+        }
+    }
+    else
+    {
+        file.open(realPath, std::ios::in | std::ios::binary);
+    }
+
+    if (directoryListing)
+    {
+        m_RespLine = "HTTP/1.0 200 OK";
+        const string& html = GetDirectoryListHTML(m_Path, realPath);
+        WriteBufferResponse(html);
+    }
+    else if (file)
+    {
+        m_RespLine = "HTTP/1.0 200 OK";
+
+        vector<string> filenameParts = StringSplit(Basename(realPath), ".");
+        const string& ext = filenameParts.back();
+
+        const string& mimeType = mp_Server->GetConfig()->GetMimeType(ext);
+        m_RespHeaders.emplace("Content-Type", mimeType);
+
+        WriteFileResponse(file);
+    }
+    else
+    {
+        m_RespLine = "HTTP/1.0 404 Not Found";
+
+        file.close();
+        file.open(mp_Server->GetConfig()->Get404File());
+        m_RespHeaders.emplace("Content-Type", "text/html");
+
+        WriteFileResponse(file);
+    }
+}
+
+void Worker::MethodPostHandler()
+{
+
 }

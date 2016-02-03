@@ -91,28 +91,25 @@ void Worker::Run()
         {
             string data;
             ss >> data;
-            std::stringstream splitSs(data);
 
-            vector<int> parts;
-            string tmpStr;
-            int tmpInt;
-            while (getline(splitSs, tmpStr, ','))
-            {
-                std::stringstream tmpSs(tmpStr);
-                tmpSs >> tmpInt;
-                parts.push_back(tmpInt);
-            }
+            unsigned short addr[] = { 0, 0, 0, 0 };
+            unsigned short port[] = { 0, 0 };
 
-            if (parts.size() < 6)
+            int count = sscanf(data.c_str(),
+                "%hu,%hu,%hu,%hu,%hu,%hu",
+                &addr[0], &addr[1], &addr[2], &addr[3],
+                &port[0], &port[1]);
+
+            if (count < 6)
             {
                 ret = SendMessage("501 Invalid Argument");
             }
             else
             {
-                unsigned short fullPort = (parts[4] * 256) + parts[5];
+                unsigned short fullPort = (port[0] * 256) + port[1];
 
                 std::stringstream tmpSs;
-                tmpSs << parts[0] << "." << parts[1] << "." << parts[2] << "." << parts[3];
+                tmpSs << addr[0] << "." << addr[1] << "." << addr[2] << "." << addr[3];
 
                 m_DataEndpoint = tcp::endpoint(asio::ip::address::from_string(tmpSs.str()), fullPort);
 
@@ -137,7 +134,7 @@ void Worker::Run()
         			string name = string(ent->d_name);
                     string filename = path + "/" + name;
 
-                    respStream << "+i8388621.48594,m825718503,";
+                    respStream << "+i" << ent->d_ino << ",m825718503,";
 
         			if (name != "." && name != "..")
         			{
