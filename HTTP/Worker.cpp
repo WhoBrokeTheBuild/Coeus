@@ -2,6 +2,8 @@
 
 #include "Server.hpp"
 #include "Functions.hpp"
+#include <chrono>
+#include <iomanip>
 
 Worker::Worker(Server* pServer, tcp::socket sock) :
     mp_Server(pServer),
@@ -58,7 +60,7 @@ void Worker::ReadRequestHeader()
         if (headerSplit.size() < 2)
             continue;
 
-        m_Headers.emplace(headerSplit[0], headerSplit[1]);
+        m_Headers.emplace(StringTrim(headerSplit[0]), StringTrim(headerSplit[1]));
     }
 }
 
@@ -75,10 +77,12 @@ void Worker::WriteBufferResponse(const string& buff)
 {
     asio::streambuf resp;
     std::ostream respStream(&resp);
-    respStream << m_RespLine << "\r\n";
+    respStream << "HTTP/1.0 " << m_RespCode << " " << m_RespMsg << "\r\n";
+
+    m_RespSize = buff.size();
 
     std::stringstream ss;
-    ss << buff.size();
+    ss << m_RespSize;
 	m_RespHeaders.emplace("Content-Size", ss.str());
 
     for (const auto& header : m_RespHeaders)
@@ -90,16 +94,19 @@ void Worker::WriteBufferResponse(const string& buff)
     respStream << buff;
 
     asio::write(m_Sock, resp);
+    LogRequest();
 }
 
 void Worker::WriteFileResponse(std::ifstream& file)
 {
     asio::streambuf resp;
     std::ostream respStream(&resp);
-    respStream << m_RespLine << "\r\n";
+    respStream << "HTTP/1.0 " << m_RespCode << " " << m_RespMsg << "\r\n";
+
+    m_RespSize = GetFileSize(file);
 
     std::stringstream ss;
-    ss << GetFileSize(file);
+    ss << m_RespSize;
 	m_RespHeaders.emplace("Content-Size", ss.str());
 
     for (const auto& header : m_RespHeaders)
@@ -128,6 +135,36 @@ void Worker::WriteFileResponse(std::ifstream& file)
         if (!file)
             break;
     } while (n > 0);
+
+    LogRequest();
+}
+
+void Worker::LogRequest()
+{
+    std::string ipAddr = m_Sock.remote_endpoint().address().to_string();
+    string verb = m_Method;
+    std::transform(verb.begin(), verb.end(), verb.begin(), ::toupper);
+
+    auto now = std::chrono::system_clock::now();
+    auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&in_time_t), "%d/%b/%Y:%H:%M:%S %z");
+
+    string referer;
+    const auto& refererIt = m_Headers.find("Referer");
+    if (refererIt != m_Headers.cend())
+        referer = refererIt->second;
+
+    string userAgent;
+    const auto& userAgentIt = m_Headers.find("User-Agent");
+    if (userAgentIt != m_Headers.cend())
+        userAgent = userAgentIt->second;
+
+    printf("%s - - [%s] \"%s %s HTTP/1.0\" %d %d \"%s\" \"%s\"\n",
+        ipAddr.c_str(), ss.str().c_str(),
+        verb.c_str(), m_Path.c_str(),
+        m_RespCode, m_RespSize,
+        referer.c_str(), userAgent.c_str());
 }
 
 string Worker::GetDirectoryListHTML(const string& path, const string& realPath)
@@ -227,13 +264,15 @@ void Worker::MethodGetHandler(const bool& sendBody /*= true*/)
 
     if (directoryListing)
     {
-        m_RespLine = "HTTP/1.0 200 OK";
+        m_RespCode = 200;
+        m_RespMsg = "OK";
         const string& html = GetDirectoryListHTML(m_Path, realPath);
         WriteBufferResponse(html);
     }
     else if (file)
     {
-        m_RespLine = "HTTP/1.0 200 OK";
+        m_RespCode = 200;
+        m_RespMsg = "OK";
 
         vector<string> filenameParts = StringSplit(Basename(realPath), ".");
         const string& ext = filenameParts.back();
@@ -245,7 +284,8 @@ void Worker::MethodGetHandler(const bool& sendBody /*= true*/)
     }
     else
     {
-        m_RespLine = "HTTP/1.0 404 Not Found";
+        m_RespCode = 404;
+        m_RespMsg = "Not Found";
 
         file.close();
         file.open(mp_Server->GetConfig()->Get404File());

@@ -38,6 +38,8 @@ private:
     void MethodGetHandler(const bool& sendBody = true);
     void MethodPostHandler();
 
+    void LogRequest();
+
     string GetDirectoryListHTML(const string& path, const string& realPath);
 
     Server* mp_Server;
@@ -52,7 +54,9 @@ private:
 
     map<string, std::function<void()>> m_Handlers;
 
-    string m_RespLine;
+    unsigned short m_RespCode;
+    unsigned short m_RespSize;
+    string m_RespMsg;
     map<string, string> m_RespHeaders;
     string m_RespBody;
 
