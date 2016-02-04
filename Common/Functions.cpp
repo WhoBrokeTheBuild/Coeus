@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <sstream>
 #include <ctime>
+#include <algorithm>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -147,6 +148,23 @@ vector<string> StringSplit(const string& str, const string& delim, int limit /*=
 	}
 
 	return stringParts;
+}
+
+string Dirname(const string& path)
+{
+	if (path.size() <= 1)
+		return path;
+
+	string tmpPath = path;
+
+	char splitString = (tmpPath.find("\\") != string::npos ? '\\' : '/');
+
+	tmpPath.erase(std::find(tmpPath.rbegin(), tmpPath.rend(), splitString).base(), tmpPath.end());
+
+	if (tmpPath.back() == splitString)
+		tmpPath.pop_back();
+
+	return tmpPath;
 }
 
 string Basename(const string& path)

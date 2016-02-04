@@ -36,7 +36,8 @@ bool ParseConfig(const string& filename, map<string, string>& config)
         {
             if (cmd == "include")
             {
-                ParseConfig(data, config);
+				string dir = Dirname(filename);
+                if (!ParseConfig(dir + "/" + data, config));
             }
         }
         else

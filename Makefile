@@ -46,7 +46,7 @@ docker-HTTP:
 	docker build --tag="coeus-http" HTTP/
 
 docker-run-HTTP:
-	docker run -d -t -p 8080:8080 coeus-http 
+	docker run -d -t -p 8080:8080 coeus-http
 
 docker-FTP:
 	docker build --tag="coeus-ftp" FTP/
@@ -109,4 +109,4 @@ Mail: $(MAIL_SRV_OBJ)
 	$(LD) -o $(MAIL_SRV_OUT) $(MAIL_SRV_OBJ) $(LD_FLAGS)
 
 run-Mail:
-	cd Mail; ../Build/MailServer
+	cd Mail; ../Build/MailServer -f conf/main.cfg

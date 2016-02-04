@@ -18,6 +18,8 @@ string StringTrim(string str);
 
 vector<string> StringSplit(const string& str, const string& delim, int limit = -1);
 
+string Dirname(const string& path);
+
 string Basename(const string& path);
 
 bool MakeDir(const string& path);
