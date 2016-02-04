@@ -29,12 +29,14 @@ Worker::Worker(Server* pServer, tcp::socket sock) :
         }
     });
 
-    m_CommandHandlers.emplace("quit", [this](string data) { Stop(); });
+    m_CommandHandlers.emplace("quit", [this](string data) {
+        Stop();
+    });
 
     m_CommandHandlers.emplace("type", [this](string data) { CommandType(data); });
     m_CommandHandlers.emplace("port", [this](string data) { CommandPort(data); });
     m_CommandHandlers.emplace("list", [this](string data) { CommandList(data); });
-    m_CommandHandlers.emplace("cwd", [this](string data) { CommandChangeDir(data); });
+    m_CommandHandlers.emplace("cwd",  [this](string data) { CommandChangeDir(data); });
     m_CommandHandlers.emplace("cdup", [this](string data) { CommandChangeDir(".."); });
     m_CommandHandlers.emplace("retr", [this](string data) { CommandReturn(data); });
     m_CommandHandlers.emplace("stor", [this](string data) { CommandStore(data); });
@@ -47,35 +49,45 @@ Worker::~Worker()
 
 void Worker::Run()
 {
+    m_ConnId = mp_Server->GetNextConnId();
     m_Running = true;
 
-    SendMessage("220 Coeus FTP Server Ready\r\n");
+    SendMessage("220 Coeus FTP Server Ready");
     while (m_Running)
     {
-        asio::streambuf buf;
-    	size_t bytesRead = asio::read_until(m_Sock, buf, "\r\n");
-        string line = {asio::buffers_begin(buf.data()), asio::buffers_end(buf.data())};
-
-        printf("%s\n", line.c_str());
-
-        std::stringstream ss(line);
-        string cmd;
-        ss >> cmd;
-
-        std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
-
-        string data;
-        getline(ss, data);
-        data = StringTrim(data);
-
-        const auto& handlerIt = m_CommandHandlers.find(cmd);
-        if (handlerIt != m_CommandHandlers.cend())
+        try
         {
-            handlerIt->second(data);
+            asio::streambuf buf;
+        	size_t bytesRead = asio::read_until(m_Sock, buf, "\r\n");
+            std::stringstream ss({asio::buffers_begin(buf.data()), asio::buffers_end(buf.data())});
+
+            string line;
+            getline(ss, line);
+            LogRequest(line);
+
+            ss.str(line);
+            string cmd;
+            ss >> cmd;
+
+            std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+
+            string data;
+            getline(ss, data);
+            data = StringTrim(data);
+
+            const auto& handlerIt = m_CommandHandlers.find(cmd);
+            if (handlerIt != m_CommandHandlers.cend())
+            {
+                handlerIt->second(data);
+            }
+            else
+            {
+                SendMessage("502 Command Not Implemented");
+            }
         }
-        else
+        catch (...)
         {
-            SendMessage("502 Command Not Implemented");
+            Stop();
         }
     }
 }
@@ -334,12 +346,23 @@ void Worker::CommandStore(string data)
 
 void Worker::SendMessage(string msg)
 {
-    msg += "\r\n";
+    LogResponse(msg);
 
+    msg += "\r\n";
     size_t bytesWritten = asio::write(m_Sock, asio::buffer(msg, msg.size()));
 
     if (bytesWritten == 0)
     {
         Stop();
     }
+}
+
+void Worker::LogRequest(string msg)
+{
+    printf("%llu[C]: %s\n", m_ConnId, msg.c_str());
+}
+
+void Worker::LogResponse(string msg)
+{
+    printf("%llu[S]: %s\n", m_ConnId, msg.c_str());
 }

@@ -24,7 +24,7 @@ void Server::Run()
     }
 
     tcp::acceptor a(m_IoSvc, tcp::endpoint(tcp::v4(), m_Config.GetPort()));
-    printf("FTP Server running on command port %d\n", m_Config.GetPort());
+    printf("FTP Server running on port %d\n", m_Config.GetPort());
 
     for (;;)
     {

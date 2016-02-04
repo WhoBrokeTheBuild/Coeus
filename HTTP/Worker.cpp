@@ -23,8 +23,13 @@ Worker::~Worker()
 
 void Worker::Run()
 {
-    ReadRequestHeader();
-    HandleRequest();
+    try
+    {
+        ReadRequestHeader();
+        HandleRequest();
+    }
+    catch (...)
+    { }
 }
 
 void Worker::ReadRequestHeader()
@@ -150,12 +155,12 @@ void Worker::LogRequest()
     std::stringstream ss;
     ss << std::put_time(std::localtime(&in_time_t), "%d/%b/%Y:%H:%M:%S %z");
 
-    string referer;
+    string referer = "-";
     const auto& refererIt = m_Headers.find("Referer");
     if (refererIt != m_Headers.cend())
         referer = refererIt->second;
 
-    string userAgent;
+    string userAgent = "-";
     const auto& userAgentIt = m_Headers.find("User-Agent");
     if (userAgentIt != m_Headers.cend())
         userAgent = userAgentIt->second;

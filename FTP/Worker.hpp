@@ -35,8 +35,12 @@ private:
     void CommandStore(string data);
 
     void SendMessage(string msg);
+    void LogRequest(string msg);
+    void LogResponse(string msg);
 
     Server* mp_Server;
+
+    unsigned long long m_ConnId;
 
     bool m_Running;
 

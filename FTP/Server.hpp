@@ -21,10 +21,14 @@ public:
     inline const Config* GetConfig() const { return &m_Config; }
     inline asio::io_service& GetIoService() { return m_IoSvc; }
 
+    inline unsigned long long GetNextConnId() { return ++m_NextConnId; }
+
 private:
 
     Config m_Config;
     asio::io_service m_IoSvc;
+
+    unsigned long long m_NextConnId = 0;
 
 };
 

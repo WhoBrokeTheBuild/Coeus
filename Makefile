@@ -1,6 +1,7 @@
 .PHONY: all clean rebuild \
 	Common CSL FTP HTTP Mail SQL \
-	RunFTP RunHTTP RunSQL RunMail	
+	RunFTP RunHTTP RunSQL RunMail \
+	docker docker-base docker-HTTP docker-FTP
 
 CC = g++
 AR = ar
@@ -35,6 +36,20 @@ rebuild: clean all
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(CC_FLAGS) -g -c -o $@ $<
+
+docker: docker-base docker-HTTP docker-FTP
+
+docker-base:
+	docker build --tag="coeus" .
+
+docker-HTTP:
+	docker build --tag="coeus-http" HTTP/
+
+docker-run-HTTP:
+	docker run -d -t -p 8080:8080 coeus-http 
+
+docker-FTP:
+	docker build --tag="coeus-ftp" FTP/
 
 COMMON_SRC = $(shell find Common/ -type f -name '*.cpp')
 COMMON_OBJ = $(addprefix $(OBJ_DIR)/, $(COMMON_SRC:.cpp=.o))
