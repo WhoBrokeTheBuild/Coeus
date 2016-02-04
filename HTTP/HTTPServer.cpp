@@ -4,14 +4,10 @@
 #include <thread>
 #include <cstdio>
 
-HTTPServer::HTTPServer(const string& configFile) :
-    m_Config(),
+HTTPServer::HTTPServer(const Config& config) :
+    m_Config(config),
     m_IoSvc()
 {
-    if (!m_Config.Load(configFile))
-    {
-        fprintf(stderr, "Error: Failed to load config\n");
-    }
 }
 
 HTTPServer::~HTTPServer()

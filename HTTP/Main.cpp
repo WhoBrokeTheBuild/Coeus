@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 {
     printf("Running CSL Version: %s\n", CSL::GetVersionString());
 
-    string config;
+    string configFile;
 
     struct option longopts[] = {
         { "config",    required_argument, NULL, 'f' },
@@ -26,15 +26,22 @@ int main(int argc, char** argv)
     {
         switch (opt) {
             case 'f':
-                config = string(optarg);
+                configFile = string(optarg);
                 break;
         }
     }
 
-    if (config.empty())
+    if (configFile.empty())
     {
         fprintf(stderr, "Error: Please specify a config file\n");
         usage();
+        return 1;
+    }
+
+    Config config;
+    if (!config.Load(configFile))
+    {
+        fprintf(stderr, "Error: Failed to load config file %s\n", configFile.c_str());
         return 1;
     }
 

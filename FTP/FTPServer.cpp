@@ -3,11 +3,10 @@
 #include "FTPWorker.hpp"
 #include <thread>
 
-FTPServer::FTPServer(const string& configFile) :
-    m_Config(),
+FTPServer::FTPServer(const Config& config) :
+    m_Config(config),
     m_IoSvc()
 {
-    m_Config.Load(configFile);
 }
 
 FTPServer::~FTPServer()

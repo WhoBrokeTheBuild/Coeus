@@ -13,7 +13,7 @@ public:
     FTPServer(const FTPServer&) = delete;
     FTPServer& operator=(const FTPServer&) = delete;
 
-    FTPServer(const string& configFile);
+    FTPServer(const Config& config);
     ~FTPServer();
 
     void Run();

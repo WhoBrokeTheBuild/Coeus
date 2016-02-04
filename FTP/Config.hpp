@@ -9,10 +9,9 @@ class Config
 {
 public:
 
-    Config(const Config&) = delete;
-    Config& operator=(const Config&) = delete;
-
     Config();
+    Config(const Config&) = default;
+    Config& operator=(const Config&) = default;
     ~Config() = default;
 
     bool Load(const string& filename);

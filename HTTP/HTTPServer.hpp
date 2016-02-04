@@ -13,7 +13,7 @@ public:
     HTTPServer(const HTTPServer&) = delete;
     HTTPServer& operator=(const HTTPServer&) = delete;
 
-    HTTPServer(const string& configFile);
+    HTTPServer(const Config& config);
     ~HTTPServer();
 
     void Run();
