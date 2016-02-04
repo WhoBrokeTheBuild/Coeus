@@ -69,6 +69,14 @@ string StringTrim(string str)
 {
     if (str.length() == 0) return str;
 
+    if (str.length() == 1)
+    {
+        if (std::isspace(str[0]))
+            return "";
+        else
+            return str;
+    }
+
     // Trim Left
 
     int endOfWhitespace = -1;
@@ -200,7 +208,7 @@ vector<DirectoryEntry> GetDirectoryList(const string& path)
 				break;
 			}
 
-            entries.push_back(DirectoryEntry(ent->d_name, type));
+            entries.push_back(DirectoryEntry(ent->d_ino, ent->d_name, type));
 		}
 
 		closedir(dir);

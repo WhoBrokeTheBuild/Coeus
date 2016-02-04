@@ -32,11 +32,13 @@ struct DirectoryEntry
         File
     };
 
-    inline DirectoryEntry(const string& filename, const EntryType& type) :
+    inline DirectoryEntry(const unsigned int& id, const string& filename, const EntryType& type) :
+        Id(id),
         Filename(filename),
         Type(type)
     { }
 
+    unsigned int Id;
     string Filename;
     EntryType Type;
 };

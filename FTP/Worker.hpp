@@ -4,9 +4,11 @@
 #include "Constants.hpp"
 #include <asio.hpp>
 #include <string>
+#include <map>
 
 using asio::ip::tcp;
 using std::string;
+using std::map;
 
 class Server;
 
@@ -25,9 +27,17 @@ public:
 
 private:
 
-    bool SendMessage(string msg);
+    void CommandType(string data);
+    void CommandPort(string data);
+    void CommandList(string data);
+    void CommandChangeDir(string data);
+    void CommandReturn(string data);
+
+    void SendMessage(string msg);
 
     Server* mp_Server;
+
+    bool m_Running;
 
     tcp::socket m_Sock;
     tcp::socket m_DataSock;
@@ -37,6 +47,8 @@ private:
     string m_Pwd = "/";
 
     TransferMode m_TransMode = TransferMode::ASCII;
+
+    map<string, std::function<void(string data)>> m_CommandHandlers;
 
 };
 
