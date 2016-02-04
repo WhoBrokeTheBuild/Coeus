@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "FTPServer.hpp"
 #include <getopt.h>
 #include <cstdlib>
 #include <cstdio>
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Server* pServer = new Server(config);
+    FTPServer* pServer = new FTPServer(config);
     pServer->Run();
     delete pServer;
 

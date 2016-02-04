@@ -6,15 +6,15 @@
 
 using asio::ip::tcp;
 
-class Server
+class FTPServer
 {
 public:
 
-    Server(const Server&) = delete;
-    Server& operator=(const Server&) = delete;
+    FTPServer(const FTPServer&) = delete;
+    FTPServer& operator=(const FTPServer&) = delete;
 
-    Server(const string& configFile);
-    ~Server();
+    FTPServer(const string& configFile);
+    ~FTPServer();
 
     void Run();
 

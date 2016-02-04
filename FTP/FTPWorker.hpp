@@ -10,17 +10,17 @@ using asio::ip::tcp;
 using std::string;
 using std::map;
 
-class Server;
+class FTPServer;
 
-class Worker
+class FTPWorker
 {
 public:
 
-    Worker(const Worker&) = delete;
-    Worker& operator=(const Worker&) = delete;
+    FTPWorker(const FTPWorker&) = delete;
+    FTPWorker& operator=(const FTPWorker&) = delete;
 
-    Worker(Server* pServer, tcp::socket sock);
-    ~Worker();
+    FTPWorker(FTPServer* pServer, tcp::socket sock);
+    ~FTPWorker();
 
     void Run();
     void Stop();
@@ -41,7 +41,7 @@ private:
     void LogRequest(string msg);
     void LogResponse(string msg);
 
-    Server* mp_Server;
+    FTPServer* mp_Server;
 
     unsigned long long m_ConnId;
 

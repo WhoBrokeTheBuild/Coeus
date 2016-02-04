@@ -1,21 +1,21 @@
-#include "Server.hpp"
+#include "FTPServer.hpp"
 
-#include "Worker.hpp"
+#include "FTPWorker.hpp"
 #include <thread>
 
-Server::Server(const string& configFile) :
+FTPServer::FTPServer(const string& configFile) :
     m_Config(),
     m_IoSvc()
 {
     m_Config.Load(configFile);
 }
 
-Server::~Server()
+FTPServer::~FTPServer()
 {
 
 }
 
-void Server::Run()
+void FTPServer::Run()
 {
     if (m_Config.GetPort() == 0)
     {
@@ -33,7 +33,7 @@ void Server::Run()
         std::thread(
             [this](tcp::socket sock)
             {
-                Worker w(this, std::move(sock));
+                FTPWorker w(this, std::move(sock));
                 w.Run();
             },
         std::move(sock)).detach();
