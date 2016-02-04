@@ -16,11 +16,6 @@ HTTPWorker::HTTPWorker(HTTPServer* pServer, tcp::socket sock) :
     m_Handlers.emplace("delete", [this](){ MethodGetHandler(); });
 }
 
-HTTPWorker::~HTTPWorker()
-{
-
-}
-
 void HTTPWorker::Run()
 {
     try

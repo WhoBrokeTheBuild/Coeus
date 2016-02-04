@@ -1,9 +1,9 @@
 #include "HTTPServer.hpp"
-
-#include "CSL.hpp"
+#include <CSL.hpp>
 #include <getopt.h>
 #include <cstdlib>
 #include <cstdio>
+#include <thread>
 
 void usage()
 {
@@ -45,9 +45,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    HTTPServer* pServer = new HTTPServer(config);
-    pServer->Run();
-    delete pServer;
+    std::thread httpThread([&](){
+        HTTPServer* pServer = new HTTPServer(config);
+        pServer->Run();
+        delete pServer;
+    });
+
+    httpThread.join();
 
     return 0;
 }

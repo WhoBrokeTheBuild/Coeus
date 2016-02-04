@@ -36,11 +36,6 @@ FTPWorker::FTPWorker(FTPServer* pServer, tcp::socket sock) :
     m_CommandHandlers.emplace("rmd",  [this](string data) { CommandRemoveDir(data); });
 }
 
-FTPWorker::~FTPWorker()
-{
-
-}
-
 void FTPWorker::Run()
 {
     m_ConnId = mp_Server->GetNextConnId();

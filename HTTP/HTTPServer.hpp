@@ -14,7 +14,7 @@ public:
     HTTPServer& operator=(const HTTPServer&) = delete;
 
     HTTPServer(const Config& config);
-    ~HTTPServer();
+    ~HTTPServer() = default;
 
     void Run();
 

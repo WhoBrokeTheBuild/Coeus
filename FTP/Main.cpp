@@ -2,6 +2,7 @@
 #include <getopt.h>
 #include <cstdlib>
 #include <cstdio>
+#include <thread>
 
 void usage()
 {
@@ -41,9 +42,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    FTPServer* pServer = new FTPServer(config);
-    pServer->Run();
-    delete pServer;
+    std::thread ftpThread([&](){
+        FTPServer* pServer = new FTPServer(config);
+        pServer->Run();
+        delete pServer;
+    });
+
+    ftpThread.join();
 
     return 0;
 }

@@ -7,13 +7,7 @@
 HTTPServer::HTTPServer(const Config& config) :
     m_Config(config),
     m_IoSvc()
-{
-}
-
-HTTPServer::~HTTPServer()
-{
-
-}
+{ }
 
 void HTTPServer::Run()
 {

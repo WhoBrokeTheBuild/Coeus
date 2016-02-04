@@ -6,13 +6,7 @@
 FTPServer::FTPServer(const Config& config) :
     m_Config(config),
     m_IoSvc()
-{
-}
-
-FTPServer::~FTPServer()
-{
-
-}
+{ }
 
 void FTPServer::Run()
 {

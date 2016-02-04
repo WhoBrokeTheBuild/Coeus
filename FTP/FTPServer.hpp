@@ -14,7 +14,7 @@ public:
     FTPServer& operator=(const FTPServer&) = delete;
 
     FTPServer(const Config& config);
-    ~FTPServer();
+    ~FTPServer() = default;
 
     void Run();
 

@@ -20,7 +20,7 @@ public:
     FTPWorker& operator=(const FTPWorker&) = delete;
 
     FTPWorker(FTPServer* pServer, tcp::socket sock);
-    ~FTPWorker();
+    ~FTPWorker() = default;
 
     void Run();
     void Stop();

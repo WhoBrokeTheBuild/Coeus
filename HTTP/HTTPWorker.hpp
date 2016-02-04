@@ -23,7 +23,7 @@ public:
     HTTPWorker& operator=(const HTTPWorker&) = delete;
 
     HTTPWorker(HTTPServer* pServer, tcp::socket sock);
-    ~HTTPWorker();
+    ~HTTPWorker() = default;
 
     void Run();
 
