@@ -20,15 +20,6 @@ Worker::Worker(Server* pServer, tcp::socket sock) :
         SendMessage("257 \"" + m_Pwd + "\" is current directory.");
     });
 
-    m_CommandHandlers.emplace("mkd", [this](string data) {
-        data = mp_Server->GetConfig()->GetRootDir() + "/" + data;
-
-        if (MakeDir(data))
-        {
-            SendMessage("257 \"" + data + "\" Created");
-        }
-    });
-
     m_CommandHandlers.emplace("quit", [this](string data) {
         Stop();
     });
@@ -40,6 +31,9 @@ Worker::Worker(Server* pServer, tcp::socket sock) :
     m_CommandHandlers.emplace("cdup", [this](string data) { CommandChangeDir(".."); });
     m_CommandHandlers.emplace("retr", [this](string data) { CommandReturn(data); });
     m_CommandHandlers.emplace("stor", [this](string data) { CommandStore(data); });
+    m_CommandHandlers.emplace("dele", [this](string data) { CommandDelete(data); });
+    m_CommandHandlers.emplace("mkd",  [this](string data) { CommandMakeDir(data); });
+    m_CommandHandlers.emplace("rmd",  [this](string data) { CommandRemoveDir(data); });
 }
 
 Worker::~Worker()
@@ -220,6 +214,7 @@ void Worker::CommandList(string data)
 
 void Worker::CommandChangeDir(string data)
 {
+    string dirname;
     if (data == "..")
     {
         if (m_Pwd == "/")
@@ -229,18 +224,26 @@ void Worker::CommandChangeDir(string data)
         }
 
         const vector<string>& dirParts = StringSplit(m_Pwd, "/");
-        m_Pwd = "/";
+        dirname = "/";
         for (const auto& str : dirParts)
         {
-            m_Pwd += str + "/";
+            dirname += str + "/";
         }
     }
     else
     {
-        m_Pwd = data;
+        dirname = data;
     }
 
-    SendMessage("250 Changed directory to \"" + m_Pwd + "\"");
+    if (FileExists(mp_Server->GetConfig()->GetRootDir() + "/" + dirname))
+    {
+        m_Pwd = dirname;
+        SendMessage("250 Changed directory to \"" + data + "\"");
+    }
+    else
+    {
+        SendMessage("530 Directory \"" + data + "\" not found");
+    }
 }
 
 void Worker::CommandReturn(string data)
@@ -342,6 +345,75 @@ void Worker::CommandStore(string data)
     m_DataSock.close();
 
     SendMessage("226 Transfer complete");
+}
+
+void Worker::CommandDelete(string data)
+{
+    if (data.empty())
+    {
+        SendMessage("501 Invalid Argument");
+    }
+
+    string filename = mp_Server->GetConfig()->GetRootDir();
+    if (data.front() == '/')
+    {
+        filename += data;
+    }
+    else
+    {
+        filename += m_Pwd + "/" + data;
+    }
+
+    if (RemoveFile(filename))
+    {
+        SendMessage("250 \"" + data + "\" Removed");
+    }
+}
+
+void Worker::CommandMakeDir(string data)
+{
+    if (data.empty())
+    {
+        SendMessage("501 Invalid Argument");
+    }
+
+    string filename = mp_Server->GetConfig()->GetRootDir();
+    if (data.front() == '/')
+    {
+        filename += data;
+    }
+    else
+    {
+        filename += m_Pwd + "/" + data;
+    }
+
+    if (MakeDir(filename))
+    {
+        SendMessage("257 \"" + data + "\" Created");
+    }
+}
+
+void Worker::CommandRemoveDir(string data)
+{
+    if (data.empty())
+    {
+        SendMessage("501 Invalid Argument");
+    }
+
+    string filename = mp_Server->GetConfig()->GetRootDir();
+    if (data.front() == '/')
+    {
+        filename += data;
+    }
+    else
+    {
+        filename += m_Pwd + "/" + data;
+    }
+
+    if (RemoveDir(filename))
+    {
+        SendMessage("250 \"" + data + "\" Deleted");
+    }
 }
 
 void Worker::SendMessage(string msg)

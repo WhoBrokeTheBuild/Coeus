@@ -33,6 +33,9 @@ private:
     void CommandChangeDir(string data);
     void CommandReturn(string data);
     void CommandStore(string data);
+    void CommandDelete(string data);
+    void CommandMakeDir(string data);
+    void CommandRemoveDir(string data);
 
     void SendMessage(string msg);
     void LogRequest(string msg);

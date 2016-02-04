@@ -171,6 +171,38 @@ bool MakeDir(const string& path)
     return true;
 }
 
+bool RemoveDir(const string& path)
+{
+    int status = rmdir(path.c_str());
+
+    if (status)
+        return false;
+
+    return true;
+}
+
+bool RemoveFile(const string& path)
+{
+    int status = unlink(path.c_str());
+
+    if (status)
+        return false;
+
+    return true;
+}
+
+bool FileExists(const string& path)
+{
+    std::ifstream file(path);
+
+    if (!file)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 time_t GetFileLastModified(const string& filename)
 {
     struct tm* clock;

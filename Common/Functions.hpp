@@ -22,6 +22,12 @@ string Basename(const string& path);
 
 bool MakeDir(const string& path);
 
+bool RemoveDir(const string& path);
+
+bool RemoveFile(const string& path);
+
+bool FileExists(const string& path);
+
 time_t GetFileLastModified(const string& filename);
 
 struct DirectoryEntry
