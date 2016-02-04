@@ -29,12 +29,15 @@ Worker::Worker(Server* pServer, tcp::socket sock) :
         }
     });
 
+    m_CommandHandlers.emplace("quit", [this](string data) { Stop(); });
+
     m_CommandHandlers.emplace("type", [this](string data) { CommandType(data); });
     m_CommandHandlers.emplace("port", [this](string data) { CommandPort(data); });
     m_CommandHandlers.emplace("list", [this](string data) { CommandList(data); });
     m_CommandHandlers.emplace("cwd", [this](string data) { CommandChangeDir(data); });
     m_CommandHandlers.emplace("cdup", [this](string data) { CommandChangeDir(".."); });
     m_CommandHandlers.emplace("retr", [this](string data) { CommandReturn(data); });
+    m_CommandHandlers.emplace("stor", [this](string data) { CommandStore(data); });
 }
 
 Worker::~Worker()
@@ -273,6 +276,56 @@ void Worker::CommandReturn(string data)
         if (!file)
             break;
     } while (n > 0);
+
+    file.close();
+
+    m_DataSock.close();
+
+    SendMessage("226 Transfer complete");
+}
+
+void Worker::CommandStore(string data)
+{
+    if (data.empty())
+    {
+        SendMessage("501 Invalid Argument");
+    }
+
+    string filename = mp_Server->GetConfig()->GetRootDir();
+    if (data.front() == '/')
+    {
+        filename += data;
+    }
+    else
+    {
+        filename += m_Pwd + "/" + data;
+    }
+
+    std::ofstream file(filename);
+
+    if (!file)
+    {
+
+    }
+
+    SendMessage("150 Opening Data Connection to Recieve File");
+
+    m_DataSock.connect(m_DataEndpoint);
+
+    const int TMP_BUFFER_SIZE = 4096;
+
+    char tmp_buffer[TMP_BUFFER_SIZE];
+
+    size_t bytesRead;
+    do
+    {
+        bytesRead = m_DataSock.read_some(asio::buffer(tmp_buffer, TMP_BUFFER_SIZE));
+
+        file.write(tmp_buffer, bytesRead);
+    }
+    while (bytesRead == TMP_BUFFER_SIZE);
+
+    file.close();
 
     m_DataSock.close();
 

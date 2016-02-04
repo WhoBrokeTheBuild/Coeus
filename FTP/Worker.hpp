@@ -32,6 +32,7 @@ private:
     void CommandList(string data);
     void CommandChangeDir(string data);
     void CommandReturn(string data);
+    void CommandStore(string data);
 
     void SendMessage(string msg);
 
