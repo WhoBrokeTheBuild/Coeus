@@ -1,7 +1,7 @@
 #include "HTTPWorker.hpp"
 
 #include "HTTPServer.hpp"
-#include "Functions.hpp"
+#include <Functions.hpp>
 #include <chrono>
 #include <iomanip>
 
