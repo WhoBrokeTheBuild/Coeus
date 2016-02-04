@@ -12,18 +12,18 @@ using std::map;
 using std::vector;
 using asio::ip::tcp;
 
-class Server;
+class HTTPServer;
 
-class Worker
+class HTTPWorker
 {
 public:
 
-    Worker() = delete;
-    Worker(const Worker&) = delete;
-    Worker& operator=(const Worker&) = delete;
+    HTTPWorker() = delete;
+    HTTPWorker(const HTTPWorker&) = delete;
+    HTTPWorker& operator=(const HTTPWorker&) = delete;
 
-    Worker(Server* pServer, tcp::socket sock);
-    ~Worker();
+    HTTPWorker(HTTPServer* pServer, tcp::socket sock);
+    ~HTTPWorker();
 
     void Run();
 
@@ -42,7 +42,7 @@ private:
 
     string GetDirectoryListHTML(const string& path, const string& realPath);
 
-    Server* mp_Server;
+    HTTPServer* mp_Server;
 
     tcp::socket m_Sock;
 

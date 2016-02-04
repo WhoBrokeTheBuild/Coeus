@@ -6,15 +6,15 @@
 
 using asio::ip::tcp;
 
-class Server
+class HTTPServer
 {
 public:
 
-    Server(const Server&) = delete;
-    Server& operator=(const Server&) = delete;
+    HTTPServer(const HTTPServer&) = delete;
+    HTTPServer& operator=(const HTTPServer&) = delete;
 
-    Server(const string& configFile);
-    ~Server();
+    HTTPServer(const string& configFile);
+    ~HTTPServer();
 
     void Run();
 

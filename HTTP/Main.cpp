@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "HTTPServer.hpp"
 
 #include "CSL.hpp"
 #include <getopt.h>
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Server* pServer = new Server(config);
+    HTTPServer* pServer = new HTTPServer(config);
     pServer->Run();
     delete pServer;
 

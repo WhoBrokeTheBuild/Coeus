@@ -1,10 +1,10 @@
-#include "Server.hpp"
+#include "HTTPServer.hpp"
 
-#include "Worker.hpp"
+#include "HTTPWorker.hpp"
 #include <thread>
 #include <cstdio>
 
-Server::Server(const string& configFile) :
+HTTPServer::HTTPServer(const string& configFile) :
     m_Config(),
     m_IoSvc()
 {
@@ -14,12 +14,12 @@ Server::Server(const string& configFile) :
     }
 }
 
-Server::~Server()
+HTTPServer::~HTTPServer()
 {
 
 }
 
-void Server::Run()
+void HTTPServer::Run()
 {
     if (m_Config.GetPort() == 0)
     {
@@ -37,7 +37,7 @@ void Server::Run()
         std::thread(
             [this](tcp::socket sock)
             {
-                Worker w(this, std::move(sock));
+                HTTPWorker w(this, std::move(sock));
                 w.Run();
             },
         std::move(sock)).detach();

@@ -1,11 +1,11 @@
-#include "Worker.hpp"
+#include "HTTPWorker.hpp"
 
-#include "Server.hpp"
+#include "HTTPServer.hpp"
 #include "Functions.hpp"
 #include <chrono>
 #include <iomanip>
 
-Worker::Worker(Server* pServer, tcp::socket sock) :
+HTTPWorker::HTTPWorker(HTTPServer* pServer, tcp::socket sock) :
     mp_Server(pServer),
     m_Sock(std::move(sock))
 {
@@ -16,12 +16,12 @@ Worker::Worker(Server* pServer, tcp::socket sock) :
     m_Handlers.emplace("delete", [this](){ MethodGetHandler(); });
 }
 
-Worker::~Worker()
+HTTPWorker::~HTTPWorker()
 {
 
 }
 
-void Worker::Run()
+void HTTPWorker::Run()
 {
     try
     {
@@ -32,7 +32,7 @@ void Worker::Run()
     { }
 }
 
-void Worker::ReadRequestHeader()
+void HTTPWorker::ReadRequestHeader()
 {
     asio::streambuf headerBuf;
     asio::read_until(m_Sock, headerBuf, "\r\n\r\n");
@@ -69,7 +69,7 @@ void Worker::ReadRequestHeader()
     }
 }
 
-void Worker::HandleRequest()
+void HTTPWorker::HandleRequest()
 {
     const auto& handlerIt = m_Handlers.find(m_Method);
     if (handlerIt != m_Handlers.cend())
@@ -78,7 +78,7 @@ void Worker::HandleRequest()
     }
 }
 
-void Worker::WriteBufferResponse(const string& buff)
+void HTTPWorker::WriteBufferResponse(const string& buff)
 {
     asio::streambuf resp;
     std::ostream respStream(&resp);
@@ -102,7 +102,7 @@ void Worker::WriteBufferResponse(const string& buff)
     LogRequest();
 }
 
-void Worker::WriteFileResponse(std::ifstream& file)
+void HTTPWorker::WriteFileResponse(std::ifstream& file)
 {
     asio::streambuf resp;
     std::ostream respStream(&resp);
@@ -144,7 +144,7 @@ void Worker::WriteFileResponse(std::ifstream& file)
     LogRequest();
 }
 
-void Worker::LogRequest()
+void HTTPWorker::LogRequest()
 {
     std::string ipAddr = m_Sock.remote_endpoint().address().to_string();
     string verb = m_Method;
@@ -172,7 +172,7 @@ void Worker::LogRequest()
         referer.c_str(), userAgent.c_str());
 }
 
-string Worker::GetDirectoryListHTML(const string& path, const string& realPath)
+string HTTPWorker::GetDirectoryListHTML(const string& path, const string& realPath)
 {
 	std::stringstream output;
 
@@ -234,7 +234,7 @@ string Worker::GetDirectoryListHTML(const string& path, const string& realPath)
 	return output.str();
 }
 
-void Worker::MethodGetHandler(const bool& sendBody /*= true*/)
+void HTTPWorker::MethodGetHandler(const bool& sendBody /*= true*/)
 {
     std::ifstream file;
     bool directoryListing = false;
@@ -300,7 +300,7 @@ void Worker::MethodGetHandler(const bool& sendBody /*= true*/)
     }
 }
 
-void Worker::MethodPostHandler()
+void HTTPWorker::MethodPostHandler()
 {
 
 }
