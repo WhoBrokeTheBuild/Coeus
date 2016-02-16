@@ -10,8 +10,6 @@ endif
 AR = ar
 LD = $(CXX)
 
-$(info CXX)
-
 BUILD_DIR = Build
 OBJ_DIR = $(BUILD_DIR)/obj
 
@@ -38,7 +36,13 @@ clean:
 
 rebuild: clean all
 
-test:
+test: test-HTTP
+
+test-HTTP:
+	-pkill HTTPServer
+	cd HTTP; ../Build/HTTPServer -f conf/main.cfg &
+	cd Test; python http.py
+	pkill HTTPServer
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
