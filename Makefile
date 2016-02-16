@@ -3,9 +3,9 @@
 	RunFTP RunHTTP RunSQL RunMail \
 	docker docker-base docker-HTTP docker-FTP
 
-CC = clang++
+CC = g++
 AR = ar
-LD = clang++
+LD = g++
 
 BUILD_DIR = Build
 OBJ_DIR = $(BUILD_DIR)/obj
