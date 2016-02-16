@@ -2,9 +2,11 @@
 #define COEUS_MAIL_SMTP_WORKER_HPP
 
 #include <string>
+#include <map>
 #include <asio.hpp>
 
 using std::string;
+using std::map;
 using asio::ip::tcp;
 
 class SMTPServer;
@@ -21,14 +23,23 @@ public:
     ~SMTPWorker() = default;
 
     void Run();
+    void Stop();
 
 private:
 
-    void HandleRequest();
+    void CommandMail(string data);
+    void CommandRecipient(string data);
+    void CommandData(string data);
+
+    void SendMessage(string msg);
 
     SMTPServer* mp_Server;
 
     tcp::socket m_Sock;
+
+    bool m_Running;
+
+    map<string, std::function<void(string)>> m_CommandHandlers;
 
 };
 

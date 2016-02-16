@@ -18,6 +18,8 @@ public:
 
     void Run();
 
+    inline const Config* GetConfig() const { return &m_Config; }
+
 private:
 
     Config m_Config;

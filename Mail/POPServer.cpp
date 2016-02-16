@@ -7,5 +7,6 @@ POPServer::POPServer(const Config& config) :
 
 void POPServer::Run()
 {
+    printf("POP Server running on port %d\n", m_Config.GetPOPPort());
 
 }

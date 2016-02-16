@@ -34,10 +34,13 @@ bool ParseConfig(const string& filename, map<string, string>& config)
 
         if (cmd.front() == '!')
         {
-            if (cmd == "include")
+            if (cmd == "!include")
             {
 				string dir = Dirname(filename);
-                if (!ParseConfig(dir + "/" + data, config));
+                if (!ParseConfig(dir + "/" + data, config))
+				{
+					// error
+				}
             }
         }
         else

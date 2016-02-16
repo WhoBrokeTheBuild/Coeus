@@ -7,5 +7,6 @@ IMAPServer::IMAPServer(const Config& config) :
 
 void IMAPServer::Run()
 {
+    printf("IMAP Server running on port %d\n", m_Config.GetIMAPPort());
 
 }

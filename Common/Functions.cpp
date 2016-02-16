@@ -98,7 +98,7 @@ string StringTrim(string str)
     // Trim Right
 
     int startOfWhitespace = -1;
-    for (unsigned int i = str.length() - 1; i >= 0; --i)
+    for (int i = str.length() - 1; i >= 0; --i)
     {
         if (!std::isspace(str[i]))
         {

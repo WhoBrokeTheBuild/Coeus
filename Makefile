@@ -3,9 +3,9 @@
 	RunFTP RunHTTP RunSQL RunMail \
 	docker docker-base docker-HTTP docker-FTP
 
-CC = g++
+CC = clang++
 AR = ar
-LD = g++
+LD = clang++
 
 BUILD_DIR = Build
 OBJ_DIR = $(BUILD_DIR)/obj
@@ -32,6 +32,8 @@ clean:
 	$(FTP_SRV_OUT) $(HTTP_SRV_OUT) $(SQL_SRV_OUT) $(MAIL_SRV_OUT)
 
 rebuild: clean all
+
+test:
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
