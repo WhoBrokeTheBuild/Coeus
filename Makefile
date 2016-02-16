@@ -3,9 +3,14 @@
 	RunFTP RunHTTP RunSQL RunMail \
 	docker docker-base docker-HTTP docker-FTP
 
-CC = clang++
+ifndef CXX
+CXX = clang++
+endif
+
 AR = ar
-LD = clang++
+LD = $(CXX)
+
+$(info CXX)
 
 BUILD_DIR = Build
 OBJ_DIR = $(BUILD_DIR)/obj
@@ -37,7 +42,7 @@ test:
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CC_FLAGS) -g -c -o $@ $<
+	$(CXX) $(CC_FLAGS) -g -c -o $@ $<
 
 docker: docker-base docker-HTTP docker-FTP
 
