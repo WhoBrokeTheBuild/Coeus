@@ -7,7 +7,10 @@ ifndef CXX
 CXX = clang++
 endif
 
+ifndef AR
 AR = ar
+endif
+
 LD = $(CXX)
 
 BUILD_DIR = Build
@@ -39,10 +42,7 @@ rebuild: clean all
 test: test-HTTP
 
 test-HTTP:
-	-pkill HTTPServer
-	cd HTTP; ../Build/HTTPServer -f conf/main.cfg &
-	cd Test; python http.py
-	pkill HTTPServer
+	sh Test/test.sh
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
