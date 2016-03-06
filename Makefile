@@ -19,9 +19,9 @@ ASIO_LD_FLAGS = -l pthread
 CSL_CC_FLAGS = -I CSL/
 CSL_LD_FLAGS = -l CSL
 
-all: Common CSL FTP Mail
+all: Common CSL FTP HTTP Mail
 
-clean: clean-Common clean-CSL clean-FTP clean-Mail
+clean: clean-Common clean-CSL clean-FTP clean-HTTP clean-Mail
 
 include Common/*.mk
 include CSL/*.mk
