@@ -25,6 +25,9 @@ public:
     HTTPWorker(HTTPServer* pServer, tcp::socket sock);
     ~HTTPWorker() = default;
 
+    map<string, string>& GetHeaders() { return m_Headers; }
+    void SetHeader(const string& key, const string& val) { m_Headers[key] = val; }
+
     void Run();
 
 private:
