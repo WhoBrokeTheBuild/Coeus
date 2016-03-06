@@ -25,4 +25,5 @@ bool LoadModule(const string& module)
     }
 
     initFunc();
+    return true;
 }
