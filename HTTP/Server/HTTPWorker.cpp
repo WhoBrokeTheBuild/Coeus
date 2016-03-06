@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iomanip>
 
+vector<function<void(HTTPWorker*)>> HTTPWorker::s_BeforeResponseCallbacks;
+
 HTTPWorker::HTTPWorker(HTTPServer* pServer, tcp::socket sock) :
     mp_Server(pServer),
     m_Sock(std::move(sock))
@@ -14,6 +16,11 @@ HTTPWorker::HTTPWorker(HTTPServer* pServer, tcp::socket sock) :
     m_Handlers.emplace("post", [this](){ MethodPostHandler(); });
     m_Handlers.emplace("put", [this](){ MethodGetHandler(); });
     m_Handlers.emplace("delete", [this](){ MethodGetHandler(); });
+}
+
+void HTTPWorker::AddBeforeResponseCallback(function<void(HTTPWorker*)> callback)
+{
+    s_BeforeResponseCallbacks.push_back(callback);
 }
 
 void HTTPWorker::Run()
@@ -260,6 +267,11 @@ void HTTPWorker::MethodGetHandler(const bool& sendBody /*= true*/)
     else
     {
         file.open(realPath, std::ios::in | std::ios::binary);
+    }
+
+    for (auto callback : s_BeforeResponseCallbacks)
+    {
+        callback(this);
     }
 
     if (directoryListing)

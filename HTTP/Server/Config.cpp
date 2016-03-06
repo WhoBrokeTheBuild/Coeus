@@ -11,6 +11,8 @@
 
 using std::ifstream;
 
+map<string, function<void(const string&)>> Config::s_DirectiveHandlers;
+
 Config::Config()
 {
 	AddDirectiveHandler("MimeFile",
@@ -60,7 +62,7 @@ void Config::AddDirectiveHandler(const string& directive, std::function<void(con
 {
 	string lowerDirective = directive;
 	std::transform(lowerDirective.begin(), lowerDirective.end(), lowerDirective.begin(), ::tolower);
-	m_DirectiveHandlers[lowerDirective] = callback;
+	s_DirectiveHandlers[lowerDirective] = callback;
 }
 
 bool Config::Load(const string& filename)
@@ -107,8 +109,8 @@ bool Config::Load(const string& filename)
         {
             if (!data.empty())
             {
-				auto callbackIt = m_DirectiveHandlers.find(cmd);
-				if (callbackIt != m_DirectiveHandlers.end())
+				auto callbackIt = s_DirectiveHandlers.find(cmd);
+				if (callbackIt != s_DirectiveHandlers.end())
 				{
 					callbackIt->second(data);
 				}

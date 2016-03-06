@@ -23,7 +23,7 @@ public:
     bool Load(const string& filename);
     bool LoadMime(const string& filename);
 
-    void AddDirectiveHandler(const string& directive, function<void(const string&)> callback);
+    static void AddDirectiveHandler(const string& directive, function<void(const string&)> callback);
 
     inline unsigned int GetPort() const { return m_Port; }
     inline string GetContentRoot() const { return m_ContentRoot; }
@@ -44,7 +44,7 @@ private:
 
     map<string, vector<string>>	m_MimeTypes;
 
-    map<string, function<void(const string&)>> m_DirectiveHandlers;
+    static map<string, function<void(const string&)>> s_DirectiveHandlers;
 
 };
 
