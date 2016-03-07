@@ -43,13 +43,16 @@ HTTP_MOD_LUA_DIR = $(HTTP_MOD_DIR)/lua
 HTTP_MOD_LUA_SRC = $(shell find $(HTTP_MOD_LUA_DIR)/ -type f -name '*.cpp')
 HTTP_MOD_LUA_OBJ = $(addprefix $(OBJ_DIR)/, $(HTTP_MOD_LUA_SRC:.cpp=.o))
 
+LUA_CC_FLAGS = pkg-config --silence-errors --cflags lua lua5.2
+LUA_LD_FLAGS = pkg-config --silence-errors --libs lua lua5.2
+
 $(OBJ_DIR)/$(HTTP_MOD_LUA_DIR)/%.o: $(HTTP_MOD_LUA_DIR)/%.cpp
 	mkdir -p $(dir $@)
-	$(CXX) $(CC_FLAGS) $(HTTP_SRV_CC_FLAGS) -fPIC -g -c -o $@ $<
+	$(CXX) $(CC_FLAGS) $(HTTP_SRV_CC_FLAGS) $(LUA_CC_FLAGS) -fPIC -g -c -o $@ $<
 
 $(HTTP_MOD_LUA_OUT): $(HTTP_MOD_LUA_OBJ)
 	mkdir -p $(dir $@)
-	$(LD) -o $(HTTP_MOD_LUA_OUT) $(LD_FLAGS) -l lua -shared $(HTTP_MOD_LUA_OBJ)
+	$(LD) -o $(HTTP_MOD_LUA_OUT) $(LD_FLAGS) $(LUA_LD_FLAGS) -shared $(HTTP_MOD_LUA_OBJ)
 
 clean-HTTP-Modules:
 	rm -f \
