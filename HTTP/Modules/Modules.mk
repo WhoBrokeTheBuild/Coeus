@@ -15,7 +15,7 @@ HTTP_MOD_HELLO_DIR = $(HTTP_MOD_DIR)/hello
 HTTP_MOD_HELLO_SRC = $(shell find $(HTTP_MOD_HELLO_DIR)/ -type f -name '*.cpp')
 HTTP_MOD_HELLO_OBJ = $(addprefix $(OBJ_DIR)/, $(HTTP_MOD_HELLO_SRC:.cpp=.o))
 
-$(OBJ_DIR)/$(HTTP_MOD_HELLO_DIR)/%.o: $(HTTP_MOD_HELLO_DIR)/%.cpp $(HTTP_MOD_HELLO_DIR)/%.hpp
+$(OBJ_DIR)/$(HTTP_MOD_HELLO_DIR)/%.o: $(HTTP_MOD_HELLO_DIR)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) $(HTTP_SRV_CC_FLAGS) -fPIC -g -c -o $@ $<
 
@@ -29,7 +29,7 @@ HTTP_MOD_HEADER_DIR = $(HTTP_MOD_DIR)/header
 HTTP_MOD_HEADER_SRC = $(shell find $(HTTP_MOD_HEADER_DIR)/ -type f -name '*.cpp')
 HTTP_MOD_HEADER_OBJ = $(addprefix $(OBJ_DIR)/, $(HTTP_MOD_HEADER_SRC:.cpp=.o))
 
-$(OBJ_DIR)/$(HTTP_MOD_HEADER_DIR)/%.o: $(HTTP_MOD_HEADER_DIR)/%.cpp $(HTTP_MOD_HEADER_DIR)/%.hpp
+$(OBJ_DIR)/$(HTTP_MOD_HEADER_DIR)/%.o: $(HTTP_MOD_HEADER_DIR)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) $(HTTP_SRV_CC_FLAGS) -fPIC -g -c -o $@ $<
 
@@ -43,7 +43,7 @@ HTTP_MOD_LUA_DIR = $(HTTP_MOD_DIR)/lua
 HTTP_MOD_LUA_SRC = $(shell find $(HTTP_MOD_LUA_DIR)/ -type f -name '*.cpp')
 HTTP_MOD_LUA_OBJ = $(addprefix $(OBJ_DIR)/, $(HTTP_MOD_LUA_SRC:.cpp=.o))
 
-$(OBJ_DIR)/$(HTTP_MOD_LUA_DIR)/%.o: $(HTTP_MOD_LUA_DIR)/%.cpp $(HTTP_MOD_LUA_DIR)/%.hpp
+$(OBJ_DIR)/$(HTTP_MOD_LUA_DIR)/%.o: $(HTTP_MOD_LUA_DIR)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) $(HTTP_SRV_CC_FLAGS) -fPIC -g -c -o $@ $<
 

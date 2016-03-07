@@ -4,7 +4,7 @@ MAIL_OUT = $(BUILD_DIR)/MailServer
 MAIL_SRC = $(shell find Mail/ -type f -name '*.cpp')
 MAIL_OBJ = $(addprefix $(OBJ_DIR)/, $(MAIL_SRC:.cpp=.o))
 
-$(OBJ_DIR)/Mail/%.o: Mail/%.cpp Mail/%.hpp
+$(OBJ_DIR)/Mail/%.o: Mail/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) $(ASIO_CC_FLAGS) -g -c -o $@ $<
 
