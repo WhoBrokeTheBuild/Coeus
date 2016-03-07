@@ -114,6 +114,10 @@ bool Config::Load(const string& filename)
 				{
 					callbackIt->second(data);
 				}
+				else
+				{
+					fprintf(stderr, "Warning, unrecognized command '%s'\n", cmd.c_str());
+				}
             }
         }
     }
