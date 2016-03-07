@@ -1,6 +1,6 @@
 #include "HTTPServer.hpp"
 
-#include "HTTPWorker.hpp"
+#include "HTTPConnection.hpp"
 #include <thread>
 #include <cstdio>
 
@@ -27,8 +27,8 @@ void HTTPServer::Run()
         std::thread(
             [this](tcp::socket sock)
             {
-                HTTPWorker w(this, std::move(sock));
-                w.Run();
+                HTTPConnection conn(this, std::move(sock));
+                conn.Run();
             },
         std::move(sock)).detach();
     }

@@ -7,7 +7,7 @@ HTTP_SRV_OBJ = $(addprefix $(OBJ_DIR)/, $(HTTP_SRV_SRC:.cpp=.o))
 
 HTTP_SRV_CC_FLAGS = -I HTTP/Server/ $(ASIO_CC_FLAGS)
 
-$(OBJ_DIR)/$(HTTP_SRV_DIR)/%.o: $(HTTP_SRV_DIR)/%.cpp
+$(OBJ_DIR)/$(HTTP_SRV_DIR)/%.o: $(HTTP_SRV_DIR)/%.cpp $(HTTP_SRV_DIR)/%.hpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) $(HTTP_LNK_CC_FLAGS) $(CSL_CC_FLAGS) $(ASIO_CC_FLAGS) -g -c -o $@ $<
 

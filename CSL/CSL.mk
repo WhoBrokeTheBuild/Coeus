@@ -4,7 +4,7 @@ CSL_OUT = $(BUILD_DIR)/libCSL.a
 CSL_SRC = $(shell find CSL/ -type f -name '*.cpp')
 CSL_OBJ = $(addprefix $(OBJ_DIR)/, $(CSL_SRC:.cpp=.o))
 
-$(OBJ_DIR)/CSL/%.o: CSL/%.cpp
+$(OBJ_DIR)/CSL/%.o: CSL/%.cpp CSL/%.hpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) -g -c -o $@ $<
 

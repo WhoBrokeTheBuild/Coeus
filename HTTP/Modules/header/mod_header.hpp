@@ -9,7 +9,6 @@ using std::string;
 using std::map;
 
 extern "C" void InitModule();
-void HandleSetHeader(const string& header);
 
 extern map<string, string> gExtraHeaders;
 

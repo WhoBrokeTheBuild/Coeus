@@ -4,7 +4,7 @@ FTP_OUT = $(BUILD_DIR)/FTPServer
 FTP_SRC = $(shell find FTP/ -type f -name '*.cpp')
 FTP_OBJ = $(addprefix $(OBJ_DIR)/, $(FTP_SRC:.cpp=.o))
 
-$(OBJ_DIR)/FTP/%.o: FTP/%.cpp
+$(OBJ_DIR)/FTP/%.o: FTP/%.cpp FTP/%.hpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CC_FLAGS) $(ASIO_CC_FLAGS) -g -c -o $@ $<
 
