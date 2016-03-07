@@ -10,7 +10,7 @@ LD = $(CXX)
 BUILD_DIR = Build
 OBJ_DIR = $(BUILD_DIR)/obj
 
-CC_FLAGS = -std=c++11 -I Common/ -I include/
+CC_FLAGS = $(CPPFLAGS) -std=c++11 -I Common/ -I include/
 LD_FLAGS = -L Build/ -L lib/ -l CoeusCommon
 
 ASIO_CC_FLAGS = -D ASIO_STANDALONE
