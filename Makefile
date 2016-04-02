@@ -1,32 +1,56 @@
-.PHONY: all clean rebuild
+.PHONY: all clean rebuild test
 
-ifndef CXX
-CXX = clang++
-endif
-
-AR = ar
 LD = $(CXX)
 
-BUILD_DIR = Build
-OBJ_DIR = $(BUILD_DIR)/obj
+OUT_DIR = Build
+OBJ_DIR = $(OUT_DIR)/obj
+OBJ_DIR_TEST = $(OBJ_DIR)/test
 
-CC_FLAGS = $(CPPFLAGS) -std=c++11 -I Common/ -I include/
-LD_FLAGS = -L Build/ -L lib/ -l CoeusCommon
+CPPFLAGS += -std=c++11 -I include/
+LDFLAGS  += -L Build/ -L lib/
+LDLIBS   +=
 
-ASIO_CC_FLAGS = -D ASIO_STANDALONE
-ASIO_LD_FLAGS = -l pthread
+COMMON_CPPFLAGS = -I Common/src/
+COMMON_LDFLAGS  =
+COMMON_LDLIBS   = -l CoeusCommon
 
-CSL_CC_FLAGS = -I CSL/
-CSL_LD_FLAGS = -l CSL
+ASIO_CPPFLAGS = -D ASIO_STANDALONE
+ASIO_LDFLAGS  =
+ASIO_LDLIBS   = -l pthread
+
+CSL_CPPFLAGS = -I CSL/src/
+CSL_LDFLAGS  =
+CSL_LDLIBS   = -l CSL
+
+TEST_CPPFLAGS = -D COEUS_TESTING
+TEST_LDFLAGS  =
+TEST_LDLIBS   = -l gtest -l pthread
+
+$(OUT_DIR)/%.a:
+	$(AR) rvs $@ $^
+
+$(OUT_DIR)/%.so:
+	mkdir -p $(dir $@)
+	$(LD) -o $@ $(LDFLAGS) -shared $(HTTP_MOD_LUA_OBJ) $(LDLIBS)
+
+$(OBJ_DIR)/%.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) -g -c -o $@ $<
+
+$(OBJ_DIR_TEST)/%.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) -g -c -o $@ $<
 
 all: Common CSL FTP HTTP Mail
 
 clean: clean-Common clean-CSL clean-FTP clean-HTTP clean-Mail
 
+test: test-Common test-FTP
+
+include Templates.mk
+include Docker.mk
 include Common/*.mk
 include CSL/*.mk
 include FTP/*.mk
 include HTTP/*.mk
 include Mail/*.mk
-include Test/*.mk
-include Docker.mk
