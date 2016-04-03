@@ -13,9 +13,6 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -28,6 +25,9 @@
 *.app
 
 *.log
+thirdparty/googletest/CMakeFiles
+thirdparty/googletest/CMakeCache.txt
+thirdparty/googletest/Makefile
 
 # Custom
 Build/

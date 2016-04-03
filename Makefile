@@ -22,8 +22,8 @@ CSL_CPPFLAGS = -I CSL/src/
 CSL_LDFLAGS  =
 CSL_LDLIBS   = -l CSL
 
-TEST_CPPFLAGS = -D COEUS_TESTING
-TEST_LDFLAGS  =
+TEST_CPPFLAGS = -D COEUS_TESTING -I thirdparty/googletest/include
+TEST_LDFLAGS  = -L thirdparty/googletest
 TEST_LDLIBS   = -l gtest -l pthread
 
 $(OUT_DIR)/%.a:
@@ -45,7 +45,10 @@ all: Common CSL FTP HTTP Mail
 
 clean: clean-Common clean-CSL clean-FTP clean-HTTP clean-Mail
 
-test: test-Common test-FTP
+test: gtest test-Common test-FTP
+
+gtest:
+	cd thirdparty/googletest; cmake .; make
 
 include Templates.mk
 include Docker.mk
