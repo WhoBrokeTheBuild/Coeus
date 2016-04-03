@@ -27,7 +27,6 @@ private:
     void HandleRequest();
 
     IMAPServer* mp_Server;
-    IMAPSession m_Session;
 
     tcp::socket m_Sock;
 

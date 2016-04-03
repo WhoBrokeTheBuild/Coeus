@@ -4,6 +4,7 @@
 #include "FTPConfig.hpp"
 #include <asio.hpp>
 #include <cstdint>
+#include <memory>
 
 using asio::ip::tcp;
 
@@ -18,6 +19,7 @@ public:
     ~FTPServer() = default;
 
     void Run();
+    void Stop();
 
     inline asio::io_service& GetIoService() { return m_IoSvc; }
 
@@ -25,8 +27,13 @@ public:
 
 private:
 
+    void Accept();
+
+    bool m_Running = false;
+
     FTPConfig m_Config;
     asio::io_service m_IoSvc;
+    std::unique_ptr<tcp::acceptor> mp_Acc;
 
     unsigned long long m_NextConnId = 0;
 

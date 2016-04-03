@@ -20,7 +20,7 @@ public:
     inline void SetPort(const unsigned int& port) { m_Port = port; }
 
     inline string GetRootDir() const { return m_RootDir; }
-    inline void GetRootDir(const string& rootDir) { m_RootDir = rootDir; }
+    inline void SetRootDir(const string& rootDir) { m_RootDir = rootDir; }
 
 private:
 

@@ -5,7 +5,6 @@
 
 SMTPWorker::SMTPWorker(SMTPServer* pServer, tcp::socket sock) :
     mp_Server(pServer),
-    m_Session(mp_Server),
     m_Sock(std::move(sock))
 {
     m_CommandHandlers.emplace("helo", [this](string data) {
@@ -23,7 +22,7 @@ void SMTPWorker::Run()
 {
     m_Running = true;
 
-    SendMessage(m_Session.Init());
+    SendMessage("220 " + mp_Server->GetConfig()->GetServerName());
     while (m_Running)
     {
         try

@@ -34,7 +34,6 @@ private:
     void SendMessage(string msg);
 
     SMTPServer* mp_Server;
-    SMTPSession m_Session;
 
     tcp::socket m_Sock;
 
