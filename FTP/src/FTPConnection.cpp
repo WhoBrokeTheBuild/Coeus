@@ -1,4 +1,4 @@
-#include "FTPWorker.hpp"
+#include "FTPConnection.hpp"
 
 #include "FTPConfig.hpp"
 #include <Functions.hpp>
@@ -7,17 +7,16 @@
 
 using std::vector;
 
-FTPWorker::FTPWorker(FTPConfig* pConfig, asio::io_service& ioSvc,
-                     ICommandSource* pCmdSrc, const uint64_t& connId) :
+FTPConnection::FTPConnection(FTPConfig* pConfig, asio::io_service& ioSvc, tcp::socket sock, const uint64_t& connId) :
     mp_Config(pConfig),
-    mp_CmdSource(pCmdSrc),
+    m_Sock(std::move(sock)),
     m_DataSock(ioSvc),
     m_ConnId(connId)
 {
     InitCommandHandlers();
 }
 
-void FTPWorker::InitCommandHandlers()
+void FTPConnection::InitCommandHandlers()
 {
     m_CommandHandlers.emplace("user", [this](string data) {
         SendMessage("230 Access Granted");
@@ -43,7 +42,7 @@ void FTPWorker::InitCommandHandlers()
     m_CommandHandlers.emplace("rmd",  [this](string data) { CommandRemoveDir(data); });
 }
 
-void FTPWorker::Run()
+void FTPConnection::Run()
 {
     m_Running = true;
 
@@ -87,13 +86,13 @@ void FTPWorker::Run()
     }
 }
 
-void FTPWorker::Stop()
+void FTPConnection::Stop()
 {
     m_Sock.close();
     m_Running = false;
 }
 
-void FTPWorker::CommandType(string data)
+void FTPConnection::CommandType(string data)
 {
     if (data.empty())
     {
@@ -131,7 +130,7 @@ void FTPWorker::CommandType(string data)
     SendMessage("200 Mode is now " + string(TransferModeName(m_TransMode)));
 }
 
-void FTPWorker::CommandPort(string data)
+void FTPConnection::CommandPort(string data)
 {
     unsigned short addr[] = { 0, 0, 0, 0 };
     unsigned short port[] = { 0, 0 };
@@ -158,7 +157,7 @@ void FTPWorker::CommandPort(string data)
     }
 }
 
-void FTPWorker::CommandList(string data)
+void FTPConnection::CommandList(string data)
 {
     asio::streambuf resp;
     std::ostream respStream(&resp);
@@ -213,7 +212,7 @@ void FTPWorker::CommandList(string data)
     SendMessage("226 Transfer complete");
 }
 
-void FTPWorker::CommandChangeDir(string data)
+void FTPConnection::CommandChangeDir(string data)
 {
     string dirname;
     if (data == "..")
@@ -247,7 +246,7 @@ void FTPWorker::CommandChangeDir(string data)
     }
 }
 
-void FTPWorker::CommandReturn(string data)
+void FTPConnection::CommandReturn(string data)
 {
     if (data.empty())
     {
@@ -300,7 +299,7 @@ void FTPWorker::CommandReturn(string data)
     SendMessage("226 Transfer complete");
 }
 
-void FTPWorker::CommandStore(string data)
+void FTPConnection::CommandStore(string data)
 {
     if (data.empty())
     {
@@ -348,7 +347,7 @@ void FTPWorker::CommandStore(string data)
     SendMessage("226 Transfer complete");
 }
 
-void FTPWorker::CommandDelete(string data)
+void FTPConnection::CommandDelete(string data)
 {
     if (data.empty())
     {
@@ -371,7 +370,7 @@ void FTPWorker::CommandDelete(string data)
     }
 }
 
-void FTPWorker::CommandMakeDir(string data)
+void FTPConnection::CommandMakeDir(string data)
 {
     if (data.empty())
     {
@@ -394,7 +393,7 @@ void FTPWorker::CommandMakeDir(string data)
     }
 }
 
-void FTPWorker::CommandRemoveDir(string data)
+void FTPConnection::CommandRemoveDir(string data)
 {
     if (data.empty())
     {
@@ -417,7 +416,7 @@ void FTPWorker::CommandRemoveDir(string data)
     }
 }
 
-void FTPWorker::SendMessage(string msg)
+void FTPConnection::SendMessage(string msg)
 {
     LogResponse(msg);
 
@@ -430,12 +429,12 @@ void FTPWorker::SendMessage(string msg)
     }
 }
 
-void FTPWorker::LogRequest(string msg)
+void FTPConnection::LogRequest(string msg)
 {
     printf("%llu[C]: %s\n", m_ConnId, msg.c_str());
 }
 
-void FTPWorker::LogResponse(string msg)
+void FTPConnection::LogResponse(string msg)
 {
     printf("%llu[S]: %s\n", m_ConnId, msg.c_str());
 }

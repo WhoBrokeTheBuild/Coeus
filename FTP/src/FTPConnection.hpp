@@ -2,7 +2,6 @@
 #define COEUS_FTP_WORKER_HPP
 
 #include "Constants.hpp"
-#include <ICommandSource.hpp>
 #include <asio.hpp>
 #include <cstdint>
 #include <string>
@@ -14,16 +13,15 @@ using std::unordered_map;
 
 class FTPConfig;
 
-class FTPWorker
+class FTPConnection
 {
 public:
 
-    FTPWorker(const FTPWorker&) = delete;
-    FTPWorker& operator=(const FTPWorker&) = delete;
+    FTPConnection(const FTPConnection&) = delete;
+    FTPConnection& operator=(const FTPConnection&) = delete;
 
-    FTPWorker(FTPConfig* pConfig, asio::io_service& ioSvc, ICommandSource* pCmdSrc,
-              const uint64_t& connId);
-    ~FTPWorker() = default;
+    FTPConnection(FTPConfig* pConfig, asio::io_service& ioSvc, tcp::socket sock, const uint64_t& connId);
+    ~FTPConnection() = default;
 
     void Run();
     void Stop();
@@ -49,8 +47,8 @@ private:
     bool m_Running;
 
     FTPConfig* mp_Config;
-    ICommandSource* mp_CmdSource;
 
+    tcp::socket m_Sock;
     tcp::socket m_DataSock;
     tcp::endpoint m_DataEndpoint;
 

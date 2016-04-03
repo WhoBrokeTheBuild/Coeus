@@ -1,6 +1,6 @@
 #include "FTPServer.hpp"
 
-#include "FTPWorker.hpp"
+#include "FTPConnection.hpp"
 #include <thread>
 
 FTPServer::FTPServer(const FTPConfig& config) :
@@ -26,8 +26,8 @@ void FTPServer::Run()
         std::thread(
             [this](tcp::socket sock)
             {
-                FTPWorker w(&m_Config, m_IoSvc, std::move(sock));
-                w.Run(GetNextConnId());
+                FTPConnection conn(&m_Config, m_IoSvc, std::move(sock), GetNextConnId());
+                conn.Run();
             },
         std::move(sock)).detach();
     }
