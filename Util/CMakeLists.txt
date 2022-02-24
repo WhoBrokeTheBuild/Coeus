@@ -1,5 +1,12 @@
 
-SET(_target CFTP)
+SET(_target Util)
+
+FILE(
+    GLOB_RECURSE
+    _public_list
+    "Private/*.h"
+    "Private/*.c"
+)
 
 FILE(
     GLOB_RECURSE
@@ -8,9 +15,18 @@ FILE(
     "Private/*.c"
 )
 
-ADD_EXECUTABLE(
+ADD_LIBRARY(
     ${_target}
+    ${_public_list}
     ${_private_list}
+)
+
+TARGET_INCLUDE_DIRECTORIES(
+    ${_target}
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
 
 SET_TARGET_PROPERTIES(
@@ -28,6 +44,6 @@ TARGET_COMPILE_DEFINITIONS(
 
 TARGET_LINK_LIBRARIES(
     ${_target}
-    PRIVATE
-        Util
+    PUBLIC
+        Threads::Threads
 )
